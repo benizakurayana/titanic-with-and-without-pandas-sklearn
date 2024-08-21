@@ -1,6 +1,6 @@
 """
 File: titanic_level1.py
-Name: 
+Name: Jane
 ----------------------------------
 This file builds a machine learning algorithm from scratch 
 by Python. We'll be using 'with open' to read in dataset,
@@ -23,11 +23,82 @@ def data_preprocess(filename: str, data: dict, mode='Train', training_data=None)
 						  (You will only use this when mode == 'Test')
 	:return data: dict[str: list], key is the column name, value is its data
 	"""
-	############################
-	#                          #
-	#          TODO:           #
-	#                          #
-	############################
+	data = {}
+
+	with open(filename, 'r') as f:
+		is_head = True
+		for line in f:
+			cols = line.strip().split(',')
+			if is_head:
+				for col in cols:
+					data[col] = []
+				data.pop('PassengerId')
+				data.pop('Name')
+				data.pop('Ticket')
+				data.pop('Cabin')
+				is_head = False
+
+			elif mode == 'Train':
+				has_missing_data = False
+				col_indices = [1, 2, 5, 6, 7, 8, 10, 12]  # Wanted columns
+				for i in col_indices:
+					if cols[i] == '':
+						has_missing_data = True
+						break
+				if not has_missing_data:  # Only process the rows without missing data in wanted columns
+					for i in col_indices:
+						if i == 1:
+							data['Survived'].append(int(cols[i]))
+						elif i == 2:
+							data['Pclass'].append(int(cols[i]))
+						elif i == 5:
+							data['Sex'].append(1 if cols[i] == 'male' else 0)
+						elif i == 6:
+							data['Age'].append(float(cols[i]))
+						elif i == 7:
+							data['SibSp'].append(int(cols[i]))
+						elif i == 8:
+							data['Parch'].append(int(cols[i]))
+						elif i == 10:
+							data['Fare'].append(float(cols[i]))
+						elif i == 12:
+							if cols[i] == 'S':
+								data['Embarked'].append(0)
+							elif cols[i] == 'C':
+								data['Embarked'].append(1)
+							elif cols[i] == 'Q':
+								data['Embarked'].append(2)
+
+			else:
+				# mode == 'Test'
+				training_data_means = {'Age': round(sum(training_data['Age']) / len(training_data['Age']), 3),
+									   'Fare': round(sum(training_data['Fare']) / len(training_data['Fare']), 3)}
+				col_indices = [1, 4, 5, 6, 7, 9, 11]  # Wanted columns
+				for i in col_indices:
+					if i == 1:
+						data['Pclass'].append(int(cols[i]))
+					elif i == 4:
+						data['Sex'].append(1 if cols[i] == 'male' else 0)
+					elif i == 5:
+						if cols[i] == '':
+							cols[i] = training_data_means['Age']
+						data['Age'].append(float(cols[i]))
+					elif i == 6:
+						data['SibSp'].append(int(cols[i]))
+					elif i == 7:
+						data['Parch'].append(int(cols[i]))
+					elif i == 9:
+						if cols[i] == '':
+							cols[i] = training_data_means['Fare']
+						data['Fare'].append(float(cols[i]))
+					elif i == 11:
+						if cols[i] == 'S':
+							data['Embarked'].append(0)
+						elif cols[i] == 'C':
+							data['Embarked'].append(1)
+						elif cols[i] == 'Q':
+							data['Embarked'].append(2)
+
 	return data
 
 
@@ -37,11 +108,14 @@ def one_hot_encoding(data: dict, feature: str):
 	:param feature: str, the column name of interest
 	:return data: dict[str, list], remove the feature column and add its one-hot encoding features
 	"""
-	############################
-	#                          #
-	#          TODO:           #
-	#                          #
-	############################
+	# Add one-hot encoding feature columns
+	unique_values = list(set(data[feature]))  # set(data[feature]) creates a set by finding the unique elements of the list and sorting them in ascending order
+	for i in range(len(unique_values)):
+		data[feature + '_' + str(i)] = [1 if val == unique_values[i] else 0 for val in data[feature]]
+
+	# Remove the feature column
+	data.pop(feature)
+
 	return data
 
 
@@ -50,11 +124,14 @@ def normalize(data: dict):
 	:param data: dict[str, list], key is the column name, value is its data
 	:return data: dict[str, list], key is the column name, value is its normalized data
 	"""
-	############################
-	#                          #
-	#          TODO:           #
-	#                          #
-	############################
+	# X_normalized = (X - X_min) / (X_max - X_min)
+	for col in data:
+		X_min = min(data[col])
+		X_max = max(data[col])
+		X_maxmin = X_max - X_min
+		for i in range(len(data[col])):
+			data[col][i] = (data[col][i] - X_min) / X_maxmin
+
 	return data
 
 
