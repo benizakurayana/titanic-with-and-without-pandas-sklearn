@@ -10,6 +10,7 @@ levels. You should do hyper-parameter tuning to find the best model.
 """
 
 import math
+import util
 TRAIN_FILE = 'titanic_data/train.csv'
 TEST_FILE = 'titanic_data/test.csv'
 
@@ -156,10 +157,25 @@ def learnPredictor(inputs: dict, labels: list, degree: int, num_epochs: int, alp
 		for i in range(len(keys)):
 			for j in range(i, len(keys)):
 				weights[keys[i] + keys[j]] = 0
+
 	# Step 2 : Start training
-	# TODO:
+	for epoch in range(num_epochs):
+		def sigmoid(k):
+			return 1 / (1 + math.exp(-k))
+
+		for i in range(len(inputs[keys[0]])):
 	# Step 3 : Feature Extract
-	# TODO:
+			y = labels[i]
+			phi_x = {key: inputs[key][i] for key in keys}
+			if degree == 2:
+				for m in range(len(keys)):
+					for n in range(m, len(keys)):
+						phi_x[keys[m] + keys[n]] = inputs[keys[m]][i] * inputs[keys[n]][i]
+
 	# Step 4 : Update weights
-	# TODO:
+			# w = w - alpha*((h-y)phi_x)
+			h = sigmoid(util.dotProduct(weights, phi_x))
+			scale = -alpha*(h-y)
+			util.increment(weights, scale, phi_x)
+
 	return weights
