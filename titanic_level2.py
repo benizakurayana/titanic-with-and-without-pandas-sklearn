@@ -72,11 +72,10 @@ def standardization(data, mode='Train'):
 	:param mode: str, indicating the mode we are using (either Train or Test)
 	:return data: DataFrame, standardized features
 	"""
-	############################
-	#                          #
-	#          TODO:           #
-	#                          #
-	############################
+	if mode == 'Train':
+		std_scaler = preprocessing.StandardScaler()
+		data = std_scaler.fit_transform(data)
+
 	return data
 
 
@@ -87,11 +86,32 @@ def main():
 	~83% on degree2; ~87% on degree3.
 	Please write down the accuracy for degree1, 2, and 3 respectively below
 	(rounding accuracies to 8 decimal places)
-	TODO: real accuracy on degree1 -> ______________________
-	TODO: real accuracy on degree2 -> ______________________
-	TODO: real accuracy on degree3 -> ______________________
+	real accuracy on degree1 -> 0.80196629
+	real accuracy on degree2 -> 0.83707865
+	real accuracy on degree3 -> 0.87640449
 	"""
-	pass
+	train_data = data_preprocess(TRAIN_FILE, 'Train')
+	train_x = train_data[0]
+	y = train_data[1]
+
+	train_x = one_hot_encoding(train_x, 'Sex')
+	train_x = one_hot_encoding(train_x, 'Pclass')
+	train_x = one_hot_encoding(train_x, 'Embarked')
+
+	std_scaler = preprocessing.StandardScaler()
+	train_x = std_scaler.fit_transform(train_x)
+
+	poly_d2 = preprocessing.PolynomialFeatures(degree=2)
+	train_x_2 = poly_d2.fit_transform(train_x)
+
+	poly_d3 = preprocessing.PolynomialFeatures(degree=3)
+	train_x_3 = poly_d3.fit_transform(train_x)
+
+	classifier = linear_model.LogisticRegression(max_iter=1000)
+
+	print('degree1: ', classifier.fit(train_x, y).score(train_x, y))
+	print('degree2: ', classifier.fit(train_x_2, y).score(train_x_2, y))
+	print('degree3: ', classifier.fit(train_x_3, y).score(train_x_3, y))
 
 
 if __name__ == '__main__':
