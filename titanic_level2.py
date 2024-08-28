@@ -29,7 +29,7 @@ def data_preprocess(filename, mode='Train', training_data=None):
 	data = pd.read_csv(filename)
 	labels = None
 
-	data.drop(columns=['PassengerId', 'Name', 'Ticket', 'Cabin'], inplace=True)
+	data.drop(columns=['PassengerId', 'Name', 'Ticket', 'Cabin'], inplace=True)  # Delete these columns
 
 	data.loc[data.Sex == 'male', 'Sex'] = 1
 	data.loc[data.Sex == 'female', 'Sex'] = 0
@@ -39,7 +39,7 @@ def data_preprocess(filename, mode='Train', training_data=None):
 	data.loc[data.Embarked == 'Q', 'Embarked'] = 2
 
 	if mode == 'Train':
-		data.dropna(inplace=True)
+		data.dropna(inplace=True)  # Delete rows with NaN values
 		labels = data.pop('Survived')
 	else:
 		# mode == 'Test'
@@ -59,11 +59,10 @@ def one_hot_encoding(data, feature):
 	:param feature: str, the column name of interest
 	:return data: DataFrame, remove the feature column and add its one-hot encoding features
 	"""
-	############################
-	#                          #
-	#          TODO:           #
-	#                          #
-	############################
+	data = pd.get_dummies(data, columns=[feature])
+	if feature == 'Pclass':
+		data.rename(columns={'Pclass_1': 'Pclass_0', 'Pclass_2': 'Pclass_1', 'Pclass_3': 'Pclass_2'}, inplace=True)
+
 	return data
 
 
